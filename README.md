@@ -42,12 +42,12 @@ Metodologia ágil com Scrum
 - Kanban (To Do / In Progress / Testing / Done)
 
 📍 **Trello do Projeto:**  
-https://trello.com/b/2DssDPDG/greeneats-modulo-de-gestao-de-produtos-rg
+https://trello.com/invite/b/692834a0a308b72c0911b185/ATTIbc7ff30a90c91232b63dd2052ffe603a5FFAAD9F/greeneats-modulo-de-gestao-de-produtos-rg
 
 ---
 
 ## 🔗 Repositório
-GitHub: https://github.com/rafags26/GreenEats
+GitHub: https://rafags26.github.io/GreenEatss/
 
 ---
 
