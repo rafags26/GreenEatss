@@ -1,6 +1,7 @@
 import React from "react";
 import logoUrl from "@assets/generated_images/minimalist_organic_logo_for_greeneats.png";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileSettings } from "@/components/profile-settings";
 
 export function Header() {
   const { toast } = useToast();
@@ -35,11 +36,14 @@ export function Header() {
             Encomendas
           </button>
           <div className="w-px h-4 bg-border self-center mx-2"></div>
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="h-8 w-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-bold">
-              JP
+          
+          <ProfileSettings>
+            <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" title="Configurações do Perfil">
+              <div className="h-8 w-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-bold border border-accent/10">
+                JP
+              </div>
             </div>
-          </div>
+          </ProfileSettings>
         </nav>
       </div>
     </header>
