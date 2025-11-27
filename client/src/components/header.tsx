@@ -7,7 +7,7 @@ export function Header() {
 
   const handleOrdersClick = () => {
     // Redirect to WhatsApp with a pre-filled message
-    const phoneNumber = "5511999999999"; // Exemplo de número
+    const phoneNumber = "5541991117171";
     const message = encodeURIComponent("Olá, gostaria de gerenciar minhas encomendas.");
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
   };
@@ -30,9 +30,9 @@ export function Header() {
           </button>
           <button 
             onClick={handleOrdersClick}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center gap-1"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            Encomendas <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full ml-1">WhatsApp</span>
+            Encomendas
           </button>
           <div className="w-px h-4 bg-border self-center mx-2"></div>
           <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
