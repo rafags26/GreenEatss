@@ -1,0 +1,77 @@
+Quero que você crie um projeto completo para a seguinte situação:
+
+A GreenEats é uma startup que conecta produtores locais de alimentos orgânicos a consumidores urbanos. Até agora eles usavam grupos de WhatsApp e planilhas Excel. Agora receberam investimento semente e precisam lançar o Módulo de Gestão de Produtos e Encomendas.
+
+Preciso que você crie um backend em Python com Flask e um frontend simples em HTML/CSS/JavaScript, seguindo estes requisitos:
+
+1) BACKEND (Flask)
+- Criar o arquivo principal app.py.
+- Configurar um servidor Flask com rotas REST.
+- Criar a entidade "Produto" em memória (pode ser uma lista em Python simulando o banco de dados).
+  Campos sugeridos:
+  - id (int)
+  - nome (string)
+  - descricao (string)
+  - preco (float)
+  - categoria (string: "Fruta", "Legume" ou "Verdura")
+  - estoque (int)
+  - unidade (string, ex: "kg" ou "unidade")
+
+- Implementar o endpoint de validação de produto:
+  - Rota: POST /validar-produto
+  - Recebe JSON com titulo (ou nome), preco e categoria.
+  - Regras de validação:
+    * Rejeitar se preco for menor ou igual a 0.
+    * Rejeitar se o título/nome tiver menos de 5 caracteres (desconsiderando espaços nas pontas).
+    * Rejeitar se a categoria não estiver entre: "Fruta", "Legume" ou "Verdura".
+  - Se houver erros, retornar JSON com { "valido": false, "erros": [lista de mensagens] } e status 400.
+  - Se estiver tudo certo, retornar { "valido": true } com status 200.
+
+- Implementar o CRUD de Produto com as rotas:
+  * GET /produtos           -> lista todos os produtos.
+  * GET /produtos/<int:id>  -> retorna um produto específico.
+  * POST /produtos          -> cria um novo produto (com validação aproveitando a lógica de /validar-produto).
+  * PUT /produtos/<int:id>  -> atualiza um produto existente.
+  * DELETE /produtos/<int:id> -> remove um produto.
+
+- Adicione comentários explicando cada parte importante do código.
+
+2) FRONTEND (HTML/CSS/JS)
+- Criar a pasta "templates" e dentro dela o arquivo index.html.
+- Criar a pasta "static" e dentro dela:
+  - style.css
+  - script.js
+
+- No index.html:
+  * Criar uma página simples chamada "Módulo de Gestão de Produtos - GreenEats".
+  * Ter um formulário para cadastro de produto com os campos: nome, descrição, preço, categoria, estoque e unidade.
+  * Ter uma área de listagem de produtos (por exemplo, uma tabela ou lista).
+  * Incluir os arquivos style.css e script.js corretamente.
+
+- No script.js:
+  * Fazer uma requisição GET para /produtos quando a página carregar para listar os produtos.
+  * Interceptar o submit do formulário, montar um objeto com os dados do produto e:
+    - (opcional) chamar primeiro o endpoint /validar-produto.
+    - depois, se estiver tudo certo, chamar o endpoint POST /produtos.
+  * Atualizar a lista mostrada na tela quando um novo produto for criado.
+  * Pode usar fetch API (sem bibliotecas externas).
+
+- No style.css:
+  * Estilizar minimamente a página (título, formulário, botões, tabela/lista) para ficar organizado.
+  * Não precisa ser muito elaborado, apenas limpo e legível.
+
+3) ESTRUTURA FINAL DO PROJETO
+Quero que a estrutura de arquivos fique assim para eu poder subir depois para o GitHub:
+
+- app.py
+- requirements.txt (se necessário)
+- /templates
+    - index.html
+- /static
+    - style.css
+    - script.js
+
+Importante:
+- Não coloque todo o código em um arquivo só.
+- Separe HTML, CSS e JS em arquivos diferentes.
+- Garanta que, ao eu baixar esse projeto e subir para o GitHub, os arquivos estejam organizados como descrito.
