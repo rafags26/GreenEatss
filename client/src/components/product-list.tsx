@@ -73,7 +73,7 @@ export function ProductList({ products, onEdit }: ProductListProps) {
               </p>
               <div className="flex items-center gap-3 mt-1 text-sm">
                 <span className="font-semibold text-primary">
-                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.preco)}
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(product.preco))}
                   <span className="text-muted-foreground font-normal ml-0.5">/{product.unidade}</span>
                 </span>
                 <span className="w-1 h-1 rounded-full bg-border"></span>

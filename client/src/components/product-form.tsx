@@ -31,7 +31,7 @@ export function ProductForm({ productToEdit, onCancel, onSuccess }: ProductFormP
     defaultValues: {
       nome: "",
       descricao: "",
-      preco: 0,
+      preco: "",
       categoria: "Legume",
       estoque: 0,
       unidade: "un",
@@ -52,9 +52,9 @@ export function ProductForm({ productToEdit, onCancel, onSuccess }: ProductFormP
       form.reset({
         nome: "",
         descricao: "",
-        preco: undefined,
-        categoria: undefined,
-        estoque: undefined,
+        preco: "",
+        categoria: "Legume",
+        estoque: 0,
         unidade: "",
       });
     }
@@ -136,7 +136,7 @@ export function ProductForm({ productToEdit, onCancel, onSuccess }: ProductFormP
                 <FormItem>
                   <FormLabel>Preço (R$)</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    <Input type="text" placeholder="0.00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -152,7 +152,7 @@ export function ProductForm({ productToEdit, onCancel, onSuccess }: ProductFormP
                 <FormItem>
                   <FormLabel>Estoque Inicial</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0" {...field} />
+                    <Input type="number" placeholder="0" {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} value={field.value} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

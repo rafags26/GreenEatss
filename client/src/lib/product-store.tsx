@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // --- Types ---
 export type Category = "Fruta" | "Legume" | "Verdura";
@@ -9,7 +10,7 @@ export interface Product {
   id: number;
   nome: string;
   descricao: string;
-  preco: number;
+  preco: string;
   categoria: Category;
   estoque: number;
   unidade: string;
@@ -19,7 +20,7 @@ export interface Product {
 export const productSchema = z.object({
   nome: z.string().trim().min(5, { message: "O nome deve ter pelo menos 5 caracteres." }),
   descricao: z.string().optional(),
-  preco: z.coerce.number().gt(0, { message: "O preço deve ser maior que 0." }),
+  preco: z.string().refine(val => parseFloat(val) > 0, { message: "O preço deve ser maior que 0." }),
   categoria: z.enum(["Fruta", "Legume", "Verdura"], {
     errorMap: () => ({ message: "Categoria inválida. Escolha Fruta, Legume ou Verdura." }),
   }),
@@ -29,9 +30,50 @@ export const productSchema = z.object({
 
 export type ProductFormData = z.infer<typeof productSchema>;
 
+// --- API Functions ---
+async function fetchProducts(): Promise<Product[]> {
+  const response = await fetch("/api/produtos");
+  if (!response.ok) throw new Error("Failed to fetch products");
+  return response.json();
+}
+
+async function createProduct(data: ProductFormData): Promise<Product> {
+  const response = await fetch("/api/produtos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.erros?.join(", ") || "Failed to create product");
+  }
+  return response.json();
+}
+
+async function updateProductApi(id: number, data: ProductFormData): Promise<Product> {
+  const response = await fetch(`/api/produtos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.erros?.join(", ") || "Failed to update product");
+  }
+  return response.json();
+}
+
+async function deleteProductApi(id: number): Promise<void> {
+  const response = await fetch(`/api/produtos/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete product");
+}
+
 // --- Context Interface ---
 interface ProductContextType {
   products: Product[];
+  isLoading: boolean;
   addProduct: (data: ProductFormData) => Promise<boolean>;
   updateProduct: (id: number, data: ProductFormData) => Promise<boolean>;
   deleteProduct: (id: number) => Promise<boolean>;
@@ -40,43 +82,73 @@ interface ProductContextType {
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-// --- Mock Data ---
-const INITIAL_PRODUCTS: Product[] = [
-  {
-    id: 1,
-    nome: "Tomate Orgânico",
-    descricao: "Tomate italiano fresco direto do produtor.",
-    preco: 8.50,
-    categoria: "Legume", // Technically a fruit, but culinarily often veggie, sticking to prompt cats
-    estoque: 50,
-    unidade: "kg"
-  },
-  {
-    id: 2,
-    nome: "Alface Americana",
-    descricao: "Alface crocante e sem agrotóxicos.",
-    preco: 4.00,
-    categoria: "Verdura",
-    estoque: 30,
-    unidade: "un"
-  },
-  {
-    id: 3,
-    nome: "Morango Silvestre",
-    descricao: "Morangos doces e pequenos.",
-    preco: 12.00,
-    categoria: "Fruta",
-    estoque: 15,
-    unidade: "bandeja"
-  }
-];
-
 // --- Provider ---
 export function ProductProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Simulate API Validation Endpoint
+  // Fetch products
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: createProduct,
+    onSuccess: (newProduct) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({ 
+        title: "Produto criado!", 
+        description: `${newProduct.nome} foi adicionado ao catálogo.` 
+      });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Erro ao criar produto", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ProductFormData }) => 
+      updateProductApi(id, data),
+    onSuccess: (updatedProduct) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({ 
+        title: "Produto atualizado!", 
+        description: `${updatedProduct.nome} foi salvo com sucesso.` 
+      });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Erro ao atualizar produto", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: deleteProductApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({ title: "Produto removido", variant: "default" });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Erro ao remover produto", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  // Validate product
   const validateProduct = (data: ProductFormData) => {
     const result = productSchema.safeParse(data);
     if (!result.success) {
@@ -88,54 +160,59 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     return { valid: true, errors: [] };
   };
 
-  // Simulate POST /produtos
+  // Wrapper functions
   const addProduct = async (data: ProductFormData) => {
-    // Validate first (simulating the /validar-produto check)
     const validation = validateProduct(data);
     if (!validation.valid) {
-      validation.errors.forEach(err => toast({ title: "Erro de validação", description: err, variant: "destructive" }));
+      validation.errors.forEach(err => 
+        toast({ title: "Erro de validação", description: err, variant: "destructive" })
+      );
       return false;
     }
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const newProduct: Product = {
-      ...data,
-      id: Math.floor(Math.random() * 10000) + 100, // Mock ID
-      descricao: data.descricao || ""
-    };
-
-    setProducts(prev => [...prev, newProduct]);
-    toast({ title: "Produto criado!", description: `${newProduct.nome} foi adicionado ao catálogo.` });
-    return true;
+    try {
+      await createMutation.mutateAsync(data);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
-  // Simulate PUT /produtos/:id
   const updateProduct = async (id: number, data: ProductFormData) => {
     const validation = validateProduct(data);
     if (!validation.valid) {
-      validation.errors.forEach(err => toast({ title: "Erro de validação", description: err, variant: "destructive" }));
+      validation.errors.forEach(err => 
+        toast({ title: "Erro de validação", description: err, variant: "destructive" })
+      );
       return false;
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data, descricao: data.descricao || "" } : p));
-    toast({ title: "Produto atualizado!", description: `${data.nome} foi salvo com sucesso.` });
-    return true;
+    try {
+      await updateMutation.mutateAsync({ id, data });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
-  // Simulate DELETE /produtos/:id
   const deleteProduct = async (id: number) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    setProducts(prev => prev.filter(p => p.id !== id));
-    toast({ title: "Produto removido", variant: "default" });
-    return true;
+    try {
+      await deleteMutation.mutateAsync(id);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   return (
-    <ProductContext.Provider value={{ products, addProduct, updateProduct, deleteProduct, validateProduct }}>
+    <ProductContext.Provider value={{ 
+      products, 
+      isLoading,
+      addProduct, 
+      updateProduct, 
+      deleteProduct, 
+      validateProduct 
+    }}>
       {children}
     </ProductContext.Provider>
   );
