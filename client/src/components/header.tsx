@@ -6,10 +6,10 @@ export function Header() {
   const { toast } = useToast();
 
   const handleOrdersClick = () => {
-    toast({
-      title: "Em breve",
-      description: "O módulo de encomendas estará disponível na próxima atualização.",
-    });
+    // Redirect to WhatsApp with a pre-filled message
+    const phoneNumber = "5511999999999"; // Exemplo de número
+    const message = encodeURIComponent("Olá, gostaria de gerenciar minhas encomendas.");
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
   };
 
   return (
@@ -30,9 +30,9 @@ export function Header() {
           </button>
           <button 
             onClick={handleOrdersClick}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center gap-1"
           >
-            Encomendas
+            Encomendas <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full ml-1">WhatsApp</span>
           </button>
           <div className="w-px h-4 bg-border self-center mx-2"></div>
           <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
